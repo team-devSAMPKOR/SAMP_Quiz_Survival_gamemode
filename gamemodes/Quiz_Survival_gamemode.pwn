@@ -97,6 +97,7 @@ public OnPlayerRequestClass(playerid, classid){
 	if(INGAME[playerid][LOGIN]) return SendClientMessage(playerid,-1,"already login");
 	join(playerid, manager(SQL, CHECK, playerid));
 	setupGangzone(playerid);
+	SetPlayerColor(playerid, 0xE6E6E6E6);
 	return 1;
 }
 
@@ -112,6 +113,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]){
 
 public OnPlayerCommandText(playerid, cmdtext[]){
 	if(!strcmp("/sav", cmdtext)){
+	    if(GetPlayerWeapon(playerid) == 46) return SendClientMessage(playerid,-1,"not save (reason: Parachute Weapon)");
+	    if(GetPlayerAnimationIndex(playerid) == 1130) return SendClientMessage(playerid,-1,"not save (reason: Fail Anim)");
 		if(!INGAME[playerid][LOGIN]) return SendClientMessage(playerid,-1,"not login");
 		manager(SQL, SAVE, playerid);
 		SendClientMessage(playerid,-1,"data save");
@@ -130,6 +133,7 @@ public OnPlayerDeath(playerid, killerid, reason){
 	death(playerid, killerid, reason);
 	return 1;
 }
+
 /* manager ------------------------------------------------------------------------------------------------------------------------------
     @ manager(INIT, GAMEMODE);
     @ manager(INIT, SERVER);
@@ -220,7 +224,7 @@ public regist(playerid, pass[]){
 	USER[playerid][MONEY] = 1000,
 	USER[playerid][KILLS] = 0,
 	USER[playerid][DEATHS] = 0,
-	USER[playerid][SKIN] = 129,
+	USER[playerid][SKIN] = 26,
 	USER[playerid][POS_X] = INGAME[playerid][SPAWN_POS_X],
  	USER[playerid][POS_Y] = INGAME[playerid][SPAWN_POS_Y],
 	USER[playerid][POS_Z] = 1200.000,
@@ -271,7 +275,7 @@ public load(playerid){
 	@ spawn(playerid)
 */
 stock spawn(playerid){
-	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 46, 1, 34, 300, 31, 1500);
+	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 46, 1, 0, 0, 0, 0);
 	SpawnPlayer(playerid);
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, USER[playerid][MONEY]);
@@ -291,6 +295,9 @@ stock thread(){
 }
 stock server(){
 	SetGameModeText("Blank Script");
+	EnableStuntBonusForAll(0);
+	DisableInteriorEnterExits();
+	ShowPlayerMarkers(PLAYER_MARKERS_MODE_OFF);
 	AddPlayerClass(0,0,0,0,0,0,0,0,0,0,0);
 	gangZone();
 }
