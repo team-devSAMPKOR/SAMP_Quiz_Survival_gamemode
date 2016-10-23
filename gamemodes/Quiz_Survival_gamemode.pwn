@@ -43,9 +43,82 @@ forward ServerThread();
 /* variable */
 new zoneBase[932];
 new infoMessege[3][502] = {
-	"{FFFF00}QUIZ SERVER{FFFFFF}\n\n 문화상품권 발굴 서바이벌 퀴즈 게임모드입니다.\n\n1단계부터 10단계까지의 미션을 통과하여 문화상품권을 챙취하세요.\n\n{FFFF00}상품{FFFFFF}\n\n1등 : 문화상품권 30,000원 (선착순 1인)\n2등 : 문화상품권 10,000원 (선착순 1인)\n3등 : 문화상품권 5,000원   (선착순 2인)\n",
+	"{FFFF00}QUIZ SERVER{FFFFFF}\n\n 문화상품권 발굴 서바이벌 퀴즈 게임모드입니다.\n\n1단계부터 10단계까지의 미션을 통과하여 문화상품권을 챙취하세요.\n\n{FFFF00}상품{FFFFFF}\n\n1등 : 문화상품권 30,000원 (선착순 1인)\n2등 : 문화상품권 10,000원 (선착순 1인)\n3등 : 문화상품권 5,000원   (선착순 2인)\n\n{FFFF00}게임방법{FFFFFF}\n\n /tip : 문제를 확인하세요.",
 	"{FFFF00}PASS STAGE PEOPLE\n\n단계별 미션 통과자{FFFFFF}\n\nStage 1 :\t\t %d명\nStage 2 :\t\t %d명\nStage 3 :\t\t %d명\nStage 4 :\t\t %d명\nStage 5 :\t\t %d명\nStage 6 :\t\t %d명\nStage 7 :\t\t %d명\nStage 8 :\t\t %d명\nStage 9 :\t\t %d명\nStage 10 :\t\t %d명\n\n{FFFF00}당신은 현재 %d단계입니다.\n",
 	"{FFFFFF}rootcode10@gmail.com\n 하이오"
+};
+
+new tipArray [ ] [  ] [ ] = {
+	{
+		"얼굴없는 두 바위 속에 갖혀버린 그들의 원한 서린 영혼의 수",
+		"어릴적 부둣가 할아버지의 서재에서 잠이든 순간",
+		"꿈이 담긴 상자속 그들의 일그러진 보물 매립지",
+		"삼각자, 원 7개, 빛나는 태양, 높이 올라가라",
+		"7계단을 내려가니 풍덩 그 앞으로 걸어가라"
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	},
+	{
+		"",
+		"",
+		"",
+		"",
+		""
+	}
 };
 
 enum USER_MODEL{
@@ -139,11 +212,21 @@ public OnPlayerCommandText(playerid, cmdtext[]){
 	    if(GetPlayerAnimationIndex(playerid) == 1130) return SendClientMessage(playerid,-1,"not save (reason: Fail Anim)");
 		if(!INGAME[playerid][LOGIN]) return SendClientMessage(playerid,-1,"not login");
 		manager(SQL, SAVE, playerid);
-		SendClientMessage(playerid,-1,"data save");
+		SendClientMessage(playerid,-1,"   data save");
         return 1;
     }
 	if(!strcmp("/help", cmdtext)){
 		ShowPlayerDialog(playerid, DL_INFO, DIALOG_STYLE_LIST, "manager", "Game Rule\nRound Stats\nfeedback\n","Select", "Cancel");
+        return 1;
+ 	}
+	if(!strcmp("/tip", cmdtext)){
+		new result[502];
+		new stage = 1;
+		new unit = 1;
+		new puz[][] = {"퍼즐조각 (3번째)"};
+		
+		format(result,sizeof(result), "{FFFF00}단서 %d : 단서를 추적하시오.{FFFFFF}\n\n%s\n%s\n\n{FFFF00}출제코드 : MJ161024100%d{FFFFFF}\n단서 유효기한(2016/10/24~2016/11/01)",stage,tipArray[0][0],puz[0],unit);
+		ShowPlayerDialog(playerid, DL_QUIZ, DIALOG_STYLE_MSGBOX, "manager",result, "Close", "");
         return 1;
  	}
 	return 0;
