@@ -68,7 +68,8 @@ enum INGAME_MODEL{
 new INGAME[MAX_PLAYERS][INGAME_MODEL];
 
 enum DYNAMIC_INGAME_MODEL{
-	bool:SPAWN_CAR
+	bool:SPAWN_CAR,
+	SPAWN_CAR_NUM
 }
 new DYNAMIC_INGAME[MAX_PLAYERS][DYNAMIC_INGAME_MODEL];
 
@@ -132,21 +133,37 @@ public OnPlayerCommandText(playerid, cmdtext[]){
 public OnPlayerDisconnect(playerid, reason){
 	if(INGAME[playerid][LOGIN])	manager(SQL, SAVE, playerid);
 	manager(INIT, USERDATA, playerid);
+	DestroyVehicle(DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM]);
 	return 1;
 }
 
 public OnPlayerDeath(playerid, killerid, reason){
 	death(playerid, killerid, reason);
+	DestroyVehicle(DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM]);
 	return 1;
 }
 
 stock spawnCar(playerid){
 	new carid;
+	do{
+	    carid = randMin(400,611);
+	}
+	while(isRejectCar(carid));
+	
 	DYNAMIC_INGAME[playerid][SPAWN_CAR] = true;
 	manager(SQL, SAVE, playerid);
-	carid = CreateVehicle(randCar(playerid), USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], -1, -1, -1);
-	PutPlayerInVehicle(playerid, carid, 0);
+	DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM] = CreateVehicle(carid, USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], -1, -1, -1);
+	PutPlayerInVehicle(playerid, DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM], 0);
 	return 1;
+}
+stock isRejectCar(carid){
+	new result;
+	switch(carid){
+	    case 425,430,432,435,441,446,449,450,452,453,454,460,464,465,472,473,476,
+		484,493,501,537,538,564,569,570,584,590,591,594,606,607,608,610,611 : result =1;
+	    default : result =0;
+	}
+	return result;
 }
 /* manager ------------------------------------------------------------------------------------------------------------------------------
     @ manager(INIT, GAMEMODE);
@@ -419,18 +436,6 @@ stock setupGangzone(playerid){
 	return 0;
 }
 
-stock randCar(playerid){
-	new result, rand = USER[playerid][ADMIN];
-	switch(rand){
-	    case 0: result = 441;
-	    case 1: result = 464;
-	    case 2: result = 465;
-	    case 3: result = 501;
-	    case 4: result = 564;
-	    case 5: result = 594;
-	}
-	return result;
-}
 stock randMin(min, max){ return random(max - min) + min;}
 stock fixSpawnPos(playerid){
 	INGAME[playerid][SPAWN_POS_X] = randMin(-3000,3000);
