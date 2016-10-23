@@ -61,10 +61,16 @@ new USER[MAX_PLAYERS][USER_MODEL];
 
 enum INGAME_MODEL{
 	bool:LOGIN,
+	bool:SPAWN_CAR,
 	Float:SPAWN_POS_X,
 	Float:SPAWN_POS_Y
 }
 new INGAME[MAX_PLAYERS][INGAME_MODEL];
+
+enum DYNAMIC_INGAME_MODEL{
+	bool:SPAWN_CAR
+}
+new DYNAMIC_INGAME[MAX_PLAYERS][DYNAMIC_INGAME_MODEL];
 
 static mysql;
 /* call back ------------------------------------------------------------------------------------------------
@@ -81,7 +87,7 @@ static mysql;
 	@ OnPlayerDisconnect -> @ data save
 	                        @ init enum
 	                        
-	@ OnPlayerDeath  ->
+	@ OnPlayerDeath  -> @ death
 */
 
 public OnGameModeExit(){return 1;}
@@ -134,6 +140,14 @@ public OnPlayerDeath(playerid, killerid, reason){
 	return 1;
 }
 
+stock spawnCar(playerid){
+	new carid;
+	DYNAMIC_INGAME[playerid][SPAWN_CAR] = true;
+	manager(SQL, SAVE, playerid);
+	carid = CreateVehicle(randCar(playerid), USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], -1, -1, -1);
+	PutPlayerInVehicle(playerid, carid, 0);
+	return 1;
+}
 /* manager ------------------------------------------------------------------------------------------------------------------------------
     @ manager(INIT, GAMEMODE);
     @ manager(INIT, SERVER);
@@ -275,7 +289,7 @@ public load(playerid){
 	@ spawn(playerid)
 */
 stock spawn(playerid){
-	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 46, 1, 0, 0, 0, 0);
+	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 0, 0, 0, 0, 0, 0);
 	SpawnPlayer(playerid);
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, USER[playerid][MONEY]);
@@ -337,8 +351,10 @@ stock dbcon(){
 stock cleaning(playerid){
 	new temp[USER_MODEL];
 	new temp2[INGAME_MODEL];
+	new temp3[DYNAMIC_INGAME_MODEL];
 	USER[playerid] = temp;
 	INGAME[playerid] = temp2;
+	DYNAMIC_INGAME[playerid] = temp3;
 }
 
 /* SERVER THREAD -----------------------------------------------------------------------------------------------------------------------------
@@ -349,6 +365,7 @@ stock cleaning(playerid){
 public ServerThread(){
     foreach (new i : Player){
         eventMoney(i);
+        isSpawning(i);
     }
 }
 
@@ -402,10 +419,29 @@ stock setupGangzone(playerid){
 	return 0;
 }
 
+stock randCar(playerid){
+	new result, rand = USER[playerid][ADMIN];
+	switch(rand){
+	    case 0: result = 441;
+	    case 1: result = 464;
+	    case 2: result = 465;
+	    case 3: result = 501;
+	    case 4: result = 564;
+	    case 5: result = 594;
+	}
+	return result;
+}
 stock randMin(min, max){ return random(max - min) + min;}
 stock fixSpawnPos(playerid){
 	INGAME[playerid][SPAWN_POS_X] = randMin(-3000,3000);
 	INGAME[playerid][SPAWN_POS_Y] = randMin(-3000,3000);
+}
+
+stock isSpawning(playerid){
+	if(DYNAMIC_INGAME[playerid][SPAWN_CAR]) return 1;
+	if(GetPlayerAnimationIndex(playerid) == 1130) return GivePlayerWeapon(playerid, 46, 1);
+	if(GetPlayerAnimationIndex(playerid) == 1224) return spawnCar(playerid);
+	return 1;
 }
 
 stock eventMoney(playerid){giveMoney(playerid, 1);}
@@ -417,6 +453,8 @@ stock giveMoney(playerid,money){
 stock death(playerid, killerid, reason){
 	fixSpawnPos(playerid);
 
+	DYNAMIC_INGAME[playerid][SPAWN_CAR] = false;
+	
 	USER[playerid][POS_X]   = INGAME[playerid][SPAWN_POS_X];
  	USER[playerid][POS_Y]   = INGAME[playerid][SPAWN_POS_Y];
 	USER[playerid][POS_Z]   = 1200.000;
