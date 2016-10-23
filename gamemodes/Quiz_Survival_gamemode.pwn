@@ -80,6 +80,8 @@ static mysql;
 
 	@ OnPlayerDisconnect -> @ data save
 	                        @ init enum
+	                        
+	@ OnPlayerDeath  ->
 */
 
 public OnGameModeExit(){return 1;}
@@ -124,6 +126,10 @@ public OnPlayerDisconnect(playerid, reason){
 	return 1;
 }
 
+public OnPlayerDeath(playerid, killerid, reason){
+	death(playerid, killerid, reason);
+	return 1;
+}
 /* manager ------------------------------------------------------------------------------------------------------------------------------
     @ manager(INIT, GAMEMODE);
     @ manager(INIT, SERVER);
@@ -399,4 +405,20 @@ stock eventMoney(playerid){giveMoney(playerid, 1);}
 stock giveMoney(playerid,money){
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, USER[playerid][MONEY]+=money);
+}
+
+stock death(playerid, killerid, reason){
+	fixSpawnPos(playerid);
+
+	USER[playerid][POS_X]   = INGAME[playerid][SPAWN_POS_X];
+ 	USER[playerid][POS_Y]   = INGAME[playerid][SPAWN_POS_Y];
+	USER[playerid][POS_Z]   = 1200.000;
+	USER[playerid][DEATHS] -= 1;
+	USER[playerid][HP]      = 100.0;
+	USER[playerid][AM]      = 100.0;
+	
+	spawn(playerid);
+	if(reason == 255) return 1;
+	USER[killerid][KILLS] += 1;
+	return 1;
 }
