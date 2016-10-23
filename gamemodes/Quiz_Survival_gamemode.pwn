@@ -26,6 +26,8 @@
 /*Dialog 400 */
 #define DL_LOGIN    400
 #define DL_REGIST   401
+#define DL_INFO     402
+#define DL_QUIZ     403
 
 /*ZONE BASE */
 #define USED_ZONE 932
@@ -40,6 +42,11 @@ forward ServerThread();
 
 /* variable */
 new zoneBase[932];
+new infoMessege[3][502] = {
+	"{FFFF00}QUIZ SERVER{FFFFFF}\n\n 문화상품권 발굴 서바이벌 퀴즈 게임모드입니다.\n\n1단계부터 10단계까지의 미션을 통과하여 문화상품권을 챙취하세요.\n\n{FFFF00}상품{FFFFFF}\n\n1등 : 문화상품권 30,000원 (선착순 1인)\n2등 : 문화상품권 10,000원 (선착순 1인)\n3등 : 문화상품권 5,000원   (선착순 2인)\n",
+	"{FFFF00}PASS STAGE PEOPLE\n\n단계별 미션 통과자{FFFFFF}\n\nStage 1 :\t\t %d명\nStage 2 :\t\t %d명\nStage 3 :\t\t %d명\nStage 4 :\t\t %d명\nStage 5 :\t\t %d명\nStage 6 :\t\t %d명\nStage 7 :\t\t %d명\nStage 8 :\t\t %d명\nStage 9 :\t\t %d명\nStage 10 :\t\t %d명\n\n{FFFF00}당신은 현재 %d단계입니다.\n",
+	"{FFFFFF}rootcode10@gmail.com\n 하이오"
+};
 
 enum USER_MODEL{
  	ID,
@@ -114,8 +121,16 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]){
 	switch(dialogid){
 		case DL_LOGIN  : checked(playerid, inputtext);
 		case DL_REGIST : manager(SQL, REGIST, playerid, inputtext);
+		case DL_INFO   : info(playerid,listitem);
 	}
 	return 1;
+}
+
+stock info(playerid, listitem){
+	new result[502];
+	if(listitem ==1) format(result,sizeof(result), infoMessege[listitem],0,0,0,0,0,0,0,0,0,0,1);
+	else format(result,sizeof(result), infoMessege[listitem]);
+	ShowPlayerDialog(playerid, DL_QUIZ, DIALOG_STYLE_MSGBOX, "manager",result, "Close", "");
 }
 
 public OnPlayerCommandText(playerid, cmdtext[]){
@@ -127,6 +142,10 @@ public OnPlayerCommandText(playerid, cmdtext[]){
 		SendClientMessage(playerid,-1,"data save");
         return 1;
     }
+	if(!strcmp("/help", cmdtext)){
+		ShowPlayerDialog(playerid, DL_INFO, DIALOG_STYLE_LIST, "manager", "Game Rule\nRound Stats\nfeedback\n","Select", "Cancel");
+        return 1;
+ 	}
 	return 0;
 }
 
@@ -154,6 +173,8 @@ stock spawnCar(playerid){
 	manager(SQL, SAVE, playerid);
 	DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM] = CreateVehicle(carid, USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], -1, -1, -1);
 	PutPlayerInVehicle(playerid, DYNAMIC_INGAME[playerid][SPAWN_CAR_NUM], 0);
+	SendClientMessage(playerid,-1,"join a web server connection");
+	SendClientMessage(playerid,-1,"원할한 게임 진행을 위해 서버웹에 접속해주시기 바랍니다.");
 	return 1;
 }
 stock isRejectCar(carid){
