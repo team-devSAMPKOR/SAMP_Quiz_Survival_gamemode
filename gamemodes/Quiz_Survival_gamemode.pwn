@@ -40,6 +40,7 @@ forward ServerThread();
 
 /* variable */
 new zoneBase[932];
+
 enum USER_MODEL{
  	ID,
 	NAME[MAX_PLAYER_NAME],
@@ -59,7 +60,9 @@ enum USER_MODEL{
 new USER[MAX_PLAYERS][USER_MODEL];
 
 enum INGAME_MODEL{
-	bool:LOGIN
+	bool:LOGIN,
+	Float:SPAWN_POS_X,
+	Float:SPAWN_POS_Y
 }
 new INGAME[MAX_PLAYERS][INGAME_MODEL];
 
@@ -201,7 +204,7 @@ public check(playerid){
 }
 
 public regist(playerid, pass[]){
-
+	fixSpawnPos(playerid);
 	format(USER[playerid][PASS],24, "%s",pass);
 
 	new query[256];
@@ -212,9 +215,9 @@ public regist(playerid, pass[]){
 	USER[playerid][KILLS] = 0,
 	USER[playerid][DEATHS] = 0,
 	USER[playerid][SKIN] = 129,
-	USER[playerid][POS_X] = 1925.0215,
- 	USER[playerid][POS_Y] = -1684.2222,
-	USER[playerid][POS_Z] = 13.5469,
+	USER[playerid][POS_X] = INGAME[playerid][SPAWN_POS_X],
+ 	USER[playerid][POS_Y] = INGAME[playerid][SPAWN_POS_Y],
+	USER[playerid][POS_Z] = 1200.000,
 	USER[playerid][ANGLE] = 255.7507,
 	USER[playerid][HP] = 100.0,
 	USER[playerid][AM] = 100.0);
@@ -262,7 +265,7 @@ public load(playerid){
 	@ spawn(playerid)
 */
 stock spawn(playerid){
-	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 0, 0, 0, 0, 0, 0);
+	SetSpawnInfo(playerid, 0, USER[playerid][SKIN], USER[playerid][POS_X], USER[playerid][POS_Y], USER[playerid][POS_Z], USER[playerid][ANGLE], 46, 1, 34, 300, 31, 1500);
 	SpawnPlayer(playerid);
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, USER[playerid][MONEY]);
@@ -386,8 +389,13 @@ stock setupGangzone(playerid){
 	return 0;
 }
 
-stock eventMoney(playerid){giveMoney(playerid, 1);}
+stock randMin(min, max){ return random(max - min) + min;}
+stock fixSpawnPos(playerid){
+	INGAME[playerid][SPAWN_POS_X] = randMin(-3000,3000);
+	INGAME[playerid][SPAWN_POS_Y] = randMin(-3000,3000);
+}
 
+stock eventMoney(playerid){giveMoney(playerid, 1);}
 stock giveMoney(playerid,money){
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, USER[playerid][MONEY]+=money);
