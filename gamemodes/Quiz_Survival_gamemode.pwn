@@ -27,6 +27,9 @@
 #define DL_LOGIN    400
 #define DL_REGIST   401
 
+/*ZONE BASE */
+#define USED_ZONE 932
+
 main(){}
 
 forward check(playerid);
@@ -36,6 +39,7 @@ forward load(playerid);
 forward ServerThread();
 
 /* variable */
+new zoneBase[932];
 enum USER_MODEL{
  	ID,
 	NAME[MAX_PLAYER_NAME],
@@ -87,6 +91,7 @@ public OnGameModeInit(){
 public OnPlayerRequestClass(playerid, classid){
 	if(INGAME[playerid][LOGIN]) return SendClientMessage(playerid,-1,"already login");
 	join(playerid, manager(SQL, CHECK, playerid));
+	setupGangzone(playerid);
 	return 1;
 }
 
@@ -278,6 +283,7 @@ stock thread(){
 stock server(){
 	SetGameModeText("Blank Script");
 	AddPlayerClass(0,0,0,0,0,0,0,0,0,0,0);
+	gangZone();
 }
 stock mode(){}
 /* TODO : README
@@ -333,6 +339,53 @@ public ServerThread(){
 /* stock -----------------------------------------------------------------------------------------------------------------------------
 	@ eventMoney(playerid) -> giveMoney(playerid,money)
 */
+
+stock gangZone(){
+	new pos[4] = { -3000, 2800, -2800, 3000 };
+	new fix = 200, tick = 0;
+	
+	for(new i = 0; i < USED_ZONE; i++){
+		tick++;
+		if(tick == 31){
+			tick = 1;
+			pos[0] = -3000;
+			pos[1] = pos[1] - fix;
+			pos[2] = -2800;
+			pos[3] = pos[3] - fix;
+		}
+		zoneBase[i] = GangZoneCreate(pos[0], pos[1], pos[2], pos[3]);
+		pos[0] = fix + pos[0];
+		pos[2] = fix + pos[2];
+	}
+}
+
+stock setupGangzone(playerid){
+	new zoneCol[2] = { 0xFFFFFF99, 0xAFAFAF99};
+	new flag = 0, flag2 = 0, tick = 0;
+	
+	for(new i = 0; i < USED_ZONE; i++){
+		tick++;
+		if(tick == 31){
+			tick = 1;
+			flag2 = !flag2;
+		}
+		flag = !flag;
+		if(flag == 1){
+			if(flag2 == 1){
+				GangZoneShowForPlayer(playerid, zoneBase[i], zoneCol[0]);
+			}else{
+				GangZoneShowForPlayer(playerid, zoneBase[i], zoneCol[1]);
+			}
+		}
+		else if(!flag2){
+			GangZoneShowForPlayer(playerid, zoneBase[i], zoneCol[0]);
+		}else{
+			GangZoneShowForPlayer(playerid, zoneBase[i], zoneCol[1]);
+		}
+	}
+	return 0;
+}
+
 stock eventMoney(playerid){giveMoney(playerid, 1);}
 
 stock giveMoney(playerid,money){
